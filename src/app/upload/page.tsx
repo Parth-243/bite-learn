@@ -104,10 +104,12 @@ export default function Upload() {
         return;
       }
 
-      // Generate unique file path
+      // Generate unique file path - simplified to avoid nested folder issues
       const timestamp = Date.now();
       const fileName = formData.videoFile.name;
-      const filePath = `reels/${user.id}/${timestamp}-${fileName}`;
+      const fileExtension = fileName.split(".").pop();
+      const cleanFileName = fileName.replace(/\.[^/.]+$/, ""); // Remove extension
+      const filePath = `${timestamp}-${user.id}-${cleanFileName}.${fileExtension}`;
 
       // Upload to Supabase Storage
       const { data: uploadData, error: uploadError } = await supabase.storage
@@ -115,6 +117,7 @@ export default function Upload() {
         .upload(filePath, formData.videoFile);
 
       if (uploadError) {
+        console.error("Upload error:", uploadError);
         setError(`Storage upload failed: ${uploadError.message}`);
         setSubmitting(false);
         return;
@@ -131,7 +134,8 @@ export default function Upload() {
         .from("videos")
         .getPublicUrl(filePath);
 
-      const videoUrl = urlData.publicUrl;
+      let videoUrl = urlData.publicUrl;
+      console.log("Video uploaded. URL:", videoUrl);
 
       // Parse tags
       const tagsArray = formData.tags
@@ -308,7 +312,7 @@ export default function Upload() {
                 value={formData.title}
                 onChange={handleInputChange}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                className="w-full px-4 py-2 bg-gray-100 text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition placeholder-gray-500"
                 placeholder="e.g., React Hooks Explained"
               />
             </div>
@@ -328,7 +332,7 @@ export default function Upload() {
                 onChange={handleInputChange}
                 required
                 rows={4}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition resize-none"
+                className="w-full px-4 py-2 bg-gray-100 text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition resize-none placeholder-gray-500"
                 placeholder="Describe what your video is about"
               />
             </div>
@@ -348,7 +352,7 @@ export default function Upload() {
                 value={formData.topic}
                 onChange={handleInputChange}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                className="w-full px-4 py-2 bg-gray-100 text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition placeholder-gray-500"
                 placeholder="e.g., Web Development"
               />
             </div>
@@ -366,7 +370,7 @@ export default function Upload() {
                 name="level"
                 value={formData.level}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                className="w-full px-4 py-2 bg-gray-100 text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
               >
                 <option value="beginner">Beginner</option>
                 <option value="intermediate">Intermediate</option>
@@ -388,7 +392,7 @@ export default function Upload() {
                 name="tags"
                 value={formData.tags}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                className="w-full px-4 py-2 bg-gray-100 text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition placeholder-gray-500"
                 placeholder="e.g., react, javascript, hooks"
               />
             </div>
@@ -408,7 +412,7 @@ export default function Upload() {
                 onChange={handleFileChange}
                 accept="video/*"
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                className="w-full px-4 py-2 bg-gray-100 text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
               />
               {formData.videoFile && (
                 <p className="mt-2 text-sm text-green-600 font-medium">
